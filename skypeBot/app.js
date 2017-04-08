@@ -25,7 +25,6 @@ var bot = new builder.UniversalBot(connector, function (session) {
 });
 server.post('/api/messages', connector.listen());
 
-
 //=========================================================
 // Activity Events
 //=========================================================
@@ -110,37 +109,47 @@ bot.dialog('about', function (session) {
 
 bot.dialog('help', [
     function (session) {
-        builder.Prompts.text(session, "Global commands that are available anytime:\n\n* subscribe - Subscribe to user repo. \n\n* unsubscribe - Unsubscribe to user repo. \n\n* repos - get list of subscribes repos. \n\n* about  - get about notify. \n*  help - promts help.\n* help <word> - for the see help in param.");
-
+        builder.Prompts.text(session, "Global commands that are available anytime:\n\n* search - get search by choosen criteria. \n\n* subscribe - Subscribe to user repo. \n\n* unsubscribe - Unsubscribe to user repo. \n\n* repos - get list of subscribes repos. \n\n* about  - get about notify. \n*  help - promts help.\n* help <word> - for the see help in param.");
     },
     function (session, results) {
-        session.send('second func %s', results.response);
+        session.send('%s', results.response);
     }
 ]).triggerAction({ matches: /^help/i });
 
-// bot.dialog('/menu', [
-//     function (session) {
-//         builder.Prompts.choice(session, "What demo would you like to run?", "prompts|picture|cards|list|carousel|receipt|actions|(quit)");
-//     },
-//     function (session, results) {
-//         if (results.response && results.response.entity != '(quit)') {
-//             // Launch demo dialog
-//             session.beginDialog('/' + results.response.entity);
-//         } else {
-//             // Exit the menu
-//             session.endDialog();
-//         }
-//     },
-//     function (session, results) {
-//         // The menu runs a loop until the user chooses to (quit).
-//         session.replaceDialog('/menu');
-//     }]).reloadAction('reloadMenu', null, { matches: /^menu|show menu/i });
 
-// bot.dialog('/prompts', [
-//     function (session) {
-//         session.send("Our Bot Builder SDK has a rich set of built-in prompts that simplify asking the user a series of questions. This demo will walk you through using each prompt. Just follow the prompts and you can quit at any time by saying 'cancel'.");
-//         builder.Prompts.text(session, "Prompts.text()\n\nEnter some text and I'll say it back.");
-//     },
+bot.dialog('search', [
+    function (session) {
+        builder.Prompts.choice(session, "What demo would you like to run?", "username|repos|code|(quit)");
+    },
+    function (session, results) {
+        if (results.response && results.response.entity != '(quit)') {
+            if (results.response.entity == 'username') {
+                session.send('lol, username');
+            }
+            if (results.response.entity == 'repos') {
+                session.send('kek, repos');
+            }
+            if (results.response.entity == 'code') {
+                session.send('cheburek, code');
+            }
+
+            session.beginDialog('search');
+
+        } else {
+            // Exit the menu
+            session.beginDialog('about');
+        }
+    },
+    function (session, results) {
+        // The menu runs a loop until the user chooses to (quit).
+        session.replaceDialog('search');
+    }]).reloadAction('reloadSearch', null, { matches: /^search|show search/i }).triggerAction({ matches: /^search/i });
+
+//  bot.dialog('/prompts', [
+//      function (session) {
+//          session.send("Our Bot Builder SDK has a rich set of built-in prompts that simplify asking the user a series of questions. This demo will walk you through using each prompt. Just follow the prompts and you can quit at any time by saying 'cancel'.");
+//          builder.Prompts.text(session, "Prompts.text()\n\nEnter some text and I'll say it back.");
+//      },
 //     function (session, results) {
 //         session.send("You entered '%s'", results.response);
 //         builder.Prompts.number(session, "Prompts.number()\n\nNow enter a number.");
