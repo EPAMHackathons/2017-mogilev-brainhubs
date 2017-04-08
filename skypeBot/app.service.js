@@ -14,7 +14,7 @@ class SkypeService {
             return repos;
         }).catch(err => {
             return err;
-        })
+        });
     }
 
     getLastCommit(userName, repoName) {
@@ -22,7 +22,7 @@ class SkypeService {
             return repos;
         }).catch(err => {
             return err;
-        })
+        });
     }
 
     subscribeRepo(userName, repoName) {
@@ -32,8 +32,13 @@ class SkypeService {
         });
     }
 
-    getSubscribedRepos(){
+    getSubscribedRepos() {
         return this.subscribesRepos;
+    }
+
+    unsubscribeRepo(fullName) {
+        let index = this.subscribesRepos.findIndex(repo => repo.getFullName == fullName);
+        this.subscribesRepos.splice(index, 1);
     }
 
     checkForUpdates() {

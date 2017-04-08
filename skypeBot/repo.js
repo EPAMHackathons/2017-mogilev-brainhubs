@@ -2,6 +2,7 @@ class Repo{
     
     constructor(repo){
         this.name = repo.repoName;
+        this.fullName = repo.fullName;
         this.ownerName = repo.owner.login;
         this.url = repo.repoUrl;
         this.description = repo.description;
@@ -10,6 +11,10 @@ class Repo{
 
     getName(){
         return this.name;
+    }
+
+    getFullName(){
+        return this.fullName;
     }
 
     getOwnerName(){
