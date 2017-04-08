@@ -11,7 +11,16 @@ class CommonService {
             let repos = [];
             this.client.user(user).repos((err, data, header) => {
                 if (data) {
-                    data.map(repo => repos.push(repo.name));
+                    data.map(repo => repos.push({
+                        repoName: repo.name,
+                        fullName: repo.full_name,
+                        description: repo.description,
+                        repoUrl: repo.url,
+                        owner: {
+                            login: repo.owner.login,
+                            avatar: repo.owner.avatar_url
+                        }
+                    }));
                     resolve(repos);
                 } else {
                     reject(err.message);
