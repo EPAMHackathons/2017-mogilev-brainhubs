@@ -123,11 +123,33 @@ bot.endConversationAction('goodbye', 'Goodbye :)', { matches: /^goodbye/i });
 // Bots Dialogs
 //=========================================================
 
-bot.dialog('userRepos', function (session) {
-    skype.commonService.getUserRepos('vitalics').then(repos => {
-        builder.Prompts.text(session, JSON.stringify(repos));
+bot.dialog('getRepos', [function (session) {
+    builder.Prompts.text(session, 'Write userName');
+},
+function (session, results) {
+    let userName = results.response;
+    skype.commonService.getUserRepos(userName).then(repos => {
+        var cards = [];
+
+        for (var index = 0; index < repos.length; index++) {
+
+            var card = new builder.HeroCard(session)
+                .title(`${repos[index].repoName}`)
+                .text(`${repos[index].description}`)
+                .images([
+                    builder.CardImage.create(session, `${repos[index].owner.avatar}`)
+                ])
+                .buttons([
+                    builder.CardAction.openUrl(session, `${repos[index].repoUrl}`, "", "GitHub")
+                ])
+            cards.push(card);
+        }
+
+        var msg = new builder.Message(session).attachments(cards);
+        session.send(msg);
     })
-})
+}
+]).triggerAction({ matches: /^getRepos/i })
 
 
 
@@ -205,7 +227,7 @@ bot.dialog('search', [
         session.replaceDialog('search');
     }]).reloadAction('reloadSearch', null, { matches: /^search|show search/i }).triggerAction({ matches: /^search/i });
 
-bot.dialog('/subrepo', [
+bot.dialog('/subscribe', [
     function (session) {
 
 
@@ -222,7 +244,25 @@ bot.dialog('/subrepo', [
         repos = skype.getSubscribedRepos();
 
     }
-]).triggerAction({ matches: /^subrepo/i });
+]).triggerAction({ matches: /^subscribe/i });
+
+
+bot.dialog('/unsubscribe', [
+    function (session) {
+        // repos = skype.subscribeRepo('vitalics', 'SVCH');
+        builder.Prompts.text(session, 'Write <userName/repoName>');
+    },
+    function (session, results) {
+        let str = results.response;
+        str = str.split('/');
+        let userName = str[0];
+        let repoName = str[1];
+        builder.Prompts.text(session, 'LOL ' + userName + ' ' + repoName);
+        skype.unsubscribeRepo(userName, repoName);
+        repos = skype.getSubscribedRepos();
+
+    }
+]).triggerAction({ matches: /^unsubscribe/i });
 
 bot.dialog('repos', [
     function (session) {
