@@ -1,4 +1,5 @@
 var gitHubApi = require('../githubApi/common.service.js');
+var Repo = require('./repo');
 
 class SkypeService {
     constructor(user) {
@@ -15,6 +16,7 @@ class SkypeService {
             return err;
         })
     }
+
     getLastCommit(userName, repoName) {
         this.commonService.getLastCommit(userName, repoName).then(repos => {
             return repos;
@@ -23,11 +25,11 @@ class SkypeService {
         })
     }
 
-    subscribeRepos(userName, repoName) {
-        this.subscribesRepos.push(repoName);
-        this.tempRepos.push(repoName);
-        this.userNames.push(userName);
-        this.tempUserNames.push(userName);
+    subscribeRepo(userName, repoName) {
+        this.commonService.getRepo(userName, repoName).then(repo => {
+            let r = new Repo(repo);
+            this.subscribesRepos.push(r);
+        });
     }
 
     checkForUpdates() {
