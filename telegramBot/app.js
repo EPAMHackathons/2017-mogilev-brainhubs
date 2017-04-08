@@ -8,7 +8,6 @@ var botOptions = {
     polling: true
 };
 var bot = new TelegramBot(token, botOptions);
-
 var repositories = [];
 
 bot.getMe().then(function (me) {
@@ -24,14 +23,14 @@ bot.onText(/\/repos (.+)/, function (msg, callback) {
         .then(repos => {
             let reposString = "Repositories:";
             for (let repo of repos) {
-                reposString += `\n ${repo}`;
+                reposString += `\n ${repo.repoName}`;
             }
             writeMessage(chatId, reposString);
         }).catch(err => {
         writeMessage(chatId, "User is not find");
         console.log(err)
     })
-})
+});
 
 
 bot.onText(/\/subrepo (.+)/, function (msg, callback) {
