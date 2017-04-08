@@ -4,6 +4,7 @@ class CommonService {
 
     constructor() {
         this.client = github.client();
+        this.search = this.client.search();
     }
 
     getUserRepos(user) {
@@ -22,6 +23,27 @@ class CommonService {
                         }
                     }));
                     resolve(repos);
+                } else {
+                    reject(err.message);
+                }
+            });
+        });
+    }
+
+    getRepo(userName, repoName) {
+        return new Promise((resolve, reject) => {
+            this.client.repo(`${userName}/${repoName}`).info((err, repo, header) => {
+                if (repo) {
+                    resolve({
+                        repoName: repo.name,
+                        fullName: repo.full_name,
+                        description: repo.description,
+                        repoUrl: repo.url,
+                        owner: {
+                            login: repo.owner.login,
+                            avatar: repo.owner.avatar_url
+                        }
+                    });
                 } else {
                     reject(err.message);
                 }
