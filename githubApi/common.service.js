@@ -36,6 +36,31 @@ class CommonService {
             });
         });
     }
+
+    searchRepos(keyword) {
+        let repos = [];
+        return new Promise((resolve, reject) => {
+            this.search.repos({
+                q: keyword
+            }, (err, data, header) => {
+                if (data) {
+                    data.items.map(repo => repos.push({
+                        repoName: repo.name,
+                        fullName: repo.full_name,
+                        description: repo.description,
+                        repoUrl: repo.url,
+                        owner: {
+                            login: repo.owner.login,
+                            avatar: repo.owner.avatar_url
+                        }
+                    }));
+                    resolve(repos);
+                } else {
+                    reject(err.message);
+                }
+            });
+        });
+    }
 }
 
 module.exports = {
