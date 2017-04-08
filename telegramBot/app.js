@@ -52,6 +52,7 @@ bot.onText(/\/subrepo (.+)/, function (msg, callback) {
         } else {
             repositories.push(newSubRepo);
             writeMessage(chatId, "Subscribe");
+            console.log(repositories[0].lastCommit.key);
         }
 
     })
@@ -76,7 +77,7 @@ bot.onText(/\/unsubrepo (.+)/, function (msg, callback) {
             i => i == chatId
         );
         if (index == -1) {
-            writeMessage(chatId,"Repositories doesn't exist in subscribed list")
+            writeMessage(chatId, "Repositories doesn't exist in subscribed list")
         } else {
             includeRepo.subUsersId.splice(index, 1);
             writeMessage(chatId, "Unsubscribe");
@@ -97,6 +98,35 @@ bot.onText(/\/help/, function (msg) {
     writeMessage(chatId, messageText);
 
 });
+
 function writeMessage(chatId, message) {
     bot.sendMessage(chatId, message);
 }
+
+setInterval(function () {
+    for (let repo of repositories) {
+        commonService.getRepoCommits(repo.authorName, repo.repositoryName)
+            .then((commits) => {
+                let index = commits.findIndex(
+                    i => i.key == repo.lastCommit.key
+                );
+
+                repo.lastCommit = commits[0];
+                if (index != 0) {
+                    let newCommits = commits.splice(0, index);
+                    newCommits.reverse();
+                    let newCommisString = "New Commits:";
+                    for (let newCommit of newCommits) {
+                        newCommisString += `\n${newCommit.message}`;
+
+                    }
+                    for (let subUserId of repo.subUsersId) {
+                        writeMessage(subUserId, newCommisString);
+                    }
+                }
+            })
+            .catch(
+                err => console.log(err)
+            )
+    }
+}, 60000);
