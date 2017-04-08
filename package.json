@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "skype": "node skypeBot/app"
+    "skype": "node skypeBot/app",
+    "telegram": "node telegramBot/app",
+    "start": "skype && telegram"
   },
   "keywords": [],
   "author": "",
