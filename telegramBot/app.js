@@ -1,6 +1,6 @@
 var TelegramBot = require('node-telegram-bot-api');
-// var AppService = require("./app-service.js");
 var GitHubApi = require('../githubApi/common.service.js');
+var Repository = require('./repository.js');
 var commonService = new GitHubApi.CommonService();
 
 const token = '320218462:AAE0jZ3m1wogSM8_ZsIRHipxm519qsF9bQI';
@@ -8,6 +8,8 @@ var botOptions = {
     polling: true
 };
 var bot = new TelegramBot(token, botOptions);
+
+var repositories = [];
 
 bot.getMe().then(function (me) {
     console.log('Hello! My name is %s!', me.first_name);
@@ -35,7 +37,33 @@ bot.onText(/\/repos (.+)/, function (msg, callback) {
 bot.onText(/\/subrepo (.+)/, function (msg, callback) {
     let chatId = msg.chat.id;
     const repo = callback[1];
+    let repoInfo = repo.split('/');
 
+    let repoLastCommit = commonService.getLastCommit(repoInfo[0], repoInfo[1]).then(lastcommit => {
+            console.log(`\nlast commit - ${lastcommit}\n`);
+            let newSubRepo = new Repository(repoInfo[0], repoInfo[1], lastcommit, chatId);
+            let includeRepo = repositories.find(x => x.authorName == newSubRepo.authorName && x.repositoryName == newSubRepo.repositoryName);
+            console.log(`\nrepositories - ${repositories}\n`);
+            console.log(`\nincludrepo - ${includeRepo}\n`);
+            if (!!includeRepo) {
+                console.log(includeRepo.subUsersId);
+                includeRepo.setNewSubUser(chatId);
+                console.log(includeRepo.subUsersId);
+                console.log(`\nrepositories - ${repositories}\n`);
+            } else {
+                console.log(`\nsubrepo - ${newSubRepo}\n`);
+                repositories.push(newSubRepo);
+                console.log(`\nrepositories - ${repositories}\n`);
+                console.log(repositories.length);
+            }
+            writeMessage(chatId, "Subscribe");
+        })
+            .catch(err => {
+                    console.log(err);
+                    writeMessage(chatId, "Repository is not find");
+                }
+            )
+        ;
 
 });
 
