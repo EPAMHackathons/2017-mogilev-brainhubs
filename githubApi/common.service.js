@@ -68,6 +68,23 @@ class CommonService {
         });
     }
 
+    getRepoCommits(user, repoName) {
+        return new Promise((resolve, reject) => {
+            let commits = [];
+            this.client.repo(`${user}/${repoName}`).commits((err, data, header) => {
+                if (data) {
+                    data.map(commit => commits.push({
+                        key: commit.sha,
+                        message: commit.commit.message
+                    }));
+                    resolve(commits);
+                } else {
+                    reject(err.message);
+                }
+            });
+        });
+    }
+
     searchRepos(keyword) {
         let repos = [];
         return new Promise((resolve, reject) => {

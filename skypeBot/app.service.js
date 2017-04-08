@@ -3,10 +3,7 @@ var Repo = require('./repo');
 
 class SkypeService {
     constructor(user) {
-        this.userNames = [];
-        this.tempUserNames = [];
         this.subscribesRepos = [];
-        this.tempRepos = [];
         this.commonService = new gitHubApi.CommonService();
     }
     getUserRepos(user) {
