@@ -1,4 +1,7 @@
 var TelegramBot = require('node-telegram-bot-api');
+// var AppService = require("./app-service.js");
+var GitHubApi = require('../githubApi/common.service.js');
+var commonService = new GitHubApi.CommonService();
 
 const token = '320218462:AAE0jZ3m1wogSM8_ZsIRHipxm519qsF9bQI';
 var botOptions = {
@@ -15,13 +18,24 @@ bot.getMe().then(function (me) {
 bot.onText(/\/repos (.+)/, function (msg, callback) {
     let chatId = msg.chat.id;
     const username = callback[1];
-    console.log(username);
-});
+    commonService.getUserRepos(username)
+        .then(repos => {
+            let reposString = "Repositories:";
+            for (let repo of repos) {
+                reposString += `\n ${repo}`;
+            }
+            writeMessage(chatId, reposString);
+        }).catch(err => {
+        writeMessage(chatId, "User is not find");
+        console.log(err)
+    })
+})
+
 
 bot.onText(/\/subrepo (.+)/, function (msg, callback) {
     let chatId = msg.chat.id;
     const repo = callback[1];
-    console.log(repo);
+
 
 });
 
