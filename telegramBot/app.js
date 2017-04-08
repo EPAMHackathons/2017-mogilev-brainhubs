@@ -1,37 +1,43 @@
 var TelegramBot = require('node-telegram-bot-api');
- 
-var token = '340278587:AAEjsyyVuBxIzHTgXk90qW2NFvriUK6odX0';
+
+const token = '320218462:AAE0jZ3m1wogSM8_ZsIRHipxm519qsF9bQI';
 var botOptions = {
     polling: true
 };
 var bot = new TelegramBot(token, botOptions);
- 
-bot.getMe().then(function(me)
-{
+
+bot.getMe().then(function (me) {
     console.log('Hello! My name is %s!', me.first_name);
     console.log('My id is %s.', me.id);
     console.log('And my username is @%s.', me.username);
 });
- 
-bot.on('text', function(msg)
-{
-    var messageChatId = msg.chat.id;
-    var messageText = msg.text;
-    var messageDate = msg.date;
-    var messageUsr = msg.from.username;
- 
-    if (messageText === '/say') {
-        sendMessageByBot(messageChatId, 'Hello World!');
-    }
 
-    if (messageText === '/krisa') {
-         bot.sendMessage(messageChatId, "go home")
-    }
- 
-    console.log(msg);
+bot.onText(/\/repos (.+)/, function (msg, callback) {
+    let chatId = msg.chat.id;
+    const username = callback[1];
+    console.log(username);
 });
- 
-function sendMessageByBot(aChatId, aMessage)
-{
-    bot.sendMessage(aChatId, aMessage, { caption: 'I\'m a cute bot!' });
+
+bot.onText(/\/subrepo (.+)/, function (msg, callback) {
+    let chatId = msg.chat.id;
+    const repo = callback[1];
+    console.log(repo);
+
+});
+
+bot.onText(/\/unsubrepo (.+)/, function (msg, callback) {
+    let chatId = msg.chat.id;
+    const repo = callback[1];
+    console.log(repo);
+
+});
+
+bot.onText(/\/help/, function (msg) {
+    let chatId = msg.chat.id;
+    let messageText = "Available commands:\n\n/repos - Get repositories users\n/subrepo - Subscribe to the repository\n/unsubrepo - Unsubscribe from repositories"
+    writeMessage(chatId, messageText);
+
+});
+function writeMessage(chatId, message) {
+    bot.sendMessage(chatId, message);
 }
