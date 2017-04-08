@@ -38,38 +38,56 @@ bot.onText(/\/subrepo (.+)/, function (msg, callback) {
     const repo = callback[1];
     let repoInfo = repo.split('/');
 
-    let repoLastCommit = commonService.getLastCommit(repoInfo[0], repoInfo[1]).then(lastcommit => {
-            console.log(`\nlast commit - ${lastcommit}\n`);
-            let newSubRepo = new Repository(repoInfo[0], repoInfo[1], lastcommit, chatId);
-            let includeRepo = repositories.find(x => x.authorName == newSubRepo.authorName && x.repositoryName == newSubRepo.repositoryName);
-            console.log(`\nrepositories - ${repositories}\n`);
-            console.log(`\nincludrepo - ${includeRepo}\n`);
-            if (!!includeRepo) {
-                console.log(includeRepo.subUsersId);
+    commonService.getLastCommit(repoInfo[0], repoInfo[1]).then(lastcommit => {
+        let newSubRepo = new Repository(repoInfo[0], repoInfo[1], lastcommit, chatId);
+        let includeRepo = repositories.find(x => x.authorName == newSubRepo.authorName && x.repositoryName == newSubRepo.repositoryName);
+        if (!!includeRepo) {
+            if (!includeRepo.subUsersId.find(x => x == chatId)) {
                 includeRepo.setNewSubUser(chatId);
-                console.log(includeRepo.subUsersId);
-                console.log(`\nrepositories - ${repositories}\n`);
+                writeMessage(chatId, "Subscribe");
             } else {
-                console.log(`\nsubrepo - ${newSubRepo}\n`);
-                repositories.push(newSubRepo);
-                console.log(`\nrepositories - ${repositories}\n`);
-                console.log(repositories.length);
+                writeMessage(chatId, "you are already subscribed");
             }
+
+        } else {
+            repositories.push(newSubRepo);
             writeMessage(chatId, "Subscribe");
-        })
-            .catch(err => {
-                    console.log(err);
-                    writeMessage(chatId, "Repository is not find");
-                }
-            )
-        ;
+        }
+
+    })
+        .catch(err => {
+                console.log(err);
+                writeMessage(chatId, "Repository is not find");
+            }
+        )
+    ;
 
 });
 
 bot.onText(/\/unsubrepo (.+)/, function (msg, callback) {
     let chatId = msg.chat.id;
     const repo = callback[1];
-    console.log(repo);
+    let repoInfo = repo.split('/');
+    let authorName = repoInfo[0];
+    let repoName = repoInfo[1];
+    let includeRepo = repositories.find(x => x.authorName == authorName && x.repositoryName == repoName);
+    if (!!includeRepo) {
+        let index = includeRepo.subUsersId.findIndex(
+            i => i == chatId
+        );
+        if (index == -1) {
+            writeMessage(chatId,"Repositories doesn't exist in subscribed list")
+        } else {
+            includeRepo.subUsersId.splice(index, 1);
+            writeMessage(chatId, "Unsubscribe");
+            if (includeRepo.subUsersId == null || includeRepo.subUsersId != undefined) {
+                includeRepo = undefined;
+            }
+        }
+
+    } else {
+        writeMessage(chatId, "Repository is not find");
+    }
 
 });
 
