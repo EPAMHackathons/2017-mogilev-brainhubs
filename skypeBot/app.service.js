@@ -32,6 +32,10 @@ class SkypeService {
         });
     }
 
+    getSubscribedRepos(){
+        return this.subscribesRepos;
+    }
+
     checkForUpdates() {
 
     }
