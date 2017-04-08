@@ -1,13 +1,16 @@
 var restify = require('restify');
 var builder = require('botbuilder');
+var skypeService = require('./app.service.js');
 
+var skype = new skypeService();
 //=========================================================
 // Bot Setup
 //=========================================================
 
 // Setup Restify Server
 const appId = 'c15781f0-5d94-41a7-8466-0cb65773f8c5';
-const appPassword = 'gA6EVPBKStrYb8nN6vSB5Cj'
+const appPassword = 'gA6EVPBKStrYb8nN6vSB5Cj';
+
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function () {
     console.log('%s listening to %s', server.name, server.url);
@@ -21,7 +24,8 @@ var connector = new builder.ChatConnector({
 
 var bot = new builder.UniversalBot(connector, function (session) {
     session.send("%s, I heard: %s", session.userData.name, session.message.text);
-    session.send("Say 'help' or something else...")
+    session.send("Say 'help' or something else...");
+    session.beginDialog('lol');
 });
 server.post('/api/messages', connector.listen());
 
@@ -75,8 +79,8 @@ bot.on('deleteUserData', function (message) {
         .address(message.address)
         .text("Hello %s... Thanks for adding me. Say 'help' to see some great demos.", name || 'there');
     bot.send(reply);
+    bot.beginDialog('lol');
 });
-
 
 //=========================================================
 // Bots Middleware
@@ -95,7 +99,11 @@ bot.endConversationAction('goodbye', 'Goodbye :)', { matches: /^goodbye/i });
 // Bots Dialogs
 //=========================================================
 
-
+bot.dialog('lol', function (session) {
+    skype.commonService.getUserRepos('vitalics').then(repos => {
+        builder.Prompts.text(session, JSON.stringify(repos));
+    })
+})
 bot.dialog('about', function (session) {
     var card = new builder.HeroCard(session)
         .title("Github Bot")
@@ -119,7 +127,7 @@ bot.dialog('help', [
 
 bot.dialog('search', [
     function (session) {
-        builder.Prompts.choice(session, "What demo would you like to run?", "username|repos|code|(quit)");
+        builder.Prompts.choice(session, "What data will you get?", "username|repos|user repos|code|(quit)");
     },
     function (session, results) {
         if (results.response && results.response.entity != '(quit)') {
@@ -131,6 +139,11 @@ bot.dialog('search', [
             }
             if (results.response.entity == 'code') {
                 session.send('cheburek, code');
+            }
+            if (results.response.entity == 'user repos') {
+                skype.commonService.getUserRepos('vitalics').then(repos => {
+                    session.send(repos.toString());
+                })
             }
 
             session.beginDialog('search');

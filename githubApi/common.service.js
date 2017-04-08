@@ -1,6 +1,6 @@
 var github = require('octonode');
 
-export default class CommonService {
+class CommonService {
 
     constructor() {
         this.client = github.client();
@@ -36,4 +36,8 @@ export default class CommonService {
             });
         });
     }
+}
+
+module.exports = {
+    CommonService
 }
